@@ -1,0 +1,179 @@
+html, body {
+  width: 100%;
+  height: auto;
+  padding: 0px;
+  margin: 0px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow-x: hidden;
+  background-color: #F2F3D3;
+}
+
+.login-container {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 20px;
+  box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 350px;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.login-form h2 {
+  margin-bottom: 1.5rem;
+  text-align: center;
+  color: #333;
+}
+
+.login-form input {
+  padding: 0.8rem;
+  margin-bottom: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 9px;
+  font-size: 1rem;
+  background-color: white;
+  color: #333;
+}
+
+.login-form button {
+  padding: 0.8rem;
+  background-color: black;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.3s ease;
+}
+
+.login-form button:hover {
+  background-color: green;
+}
+
+.app-header {
+  width: 100%;
+  background-color: #003817;
+  padding: 1rem 2rem;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 10;
+}
+
+.app-title {
+  font-size: 1.5rem;
+  margin: 0;
+  font-family:'Times New Roman', Times, serif;
+}
+
+.header-login-button {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  background-color: #F2F3D3;
+  color: black;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  margin-left: 900px;
+  font-family: 'Times New Roman', Times, serif;
+}
+
+.header-login-button:hover {
+  background-color: #F5DC4C;
+}
+
+.header-registry-button {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  background-color: black;
+  color: #F2F3D3;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  margin-right: 50px;
+  font-family: 'Times New Roman', Times, serif;
+}
+
+.header-registry-button:hover {
+  background-color: #F5DC4C;
+}
+
+.app-content {
+  width: 100%;
+  margin-top: 80px; /* para que no se oculte por el header */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.welcome-msg {
+  margin-right: 20px;
+  font-family: 'Times New Roman', Times, serif;
+}
+
+.main-page {
+  text-align: center;
+}
+/* Tarjetas */
+.card-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.5rem;
+}
+
+.card {
+  background-color: white;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  width: 200px;
+  text-align: center;
+  transition: transform 0.2s ease;
+}
+
+.card:hover {
+  transform: scale(1.05);
+}
+
+.card img {
+  width: 60px;
+  margin-bottom: 1rem;
+}
+
+.card p {
+  font-weight: 600;
+  color: #333;
+}
+
+.auth-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-right: 100px;
+}
+
+.logout-button {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  background-color: white;
+  color: #003817;
+  border: 1px solid #003817;
+  border-radius: 12px;
+  cursor: pointer;
+  font-family: 'Times New Roman', Times, serif;
+}
+
+.logout-button:hover {
+  background-color: #F5DC4C;
+}
