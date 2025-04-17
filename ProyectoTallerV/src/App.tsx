@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { motion } from 'framer-motion'
 import './App.css'
 
 interface GiftList {
@@ -17,6 +18,8 @@ function App() {
   const [selectedList, setSelectedList] = useState<GiftList | null>(null)
   const [creatingListType, setCreatingListType] = useState<string | null>(null)
   const [newListTitle, setNewListTitle] = useState('')
+  const [isEditingTitle, setIsEditingTitle] = useState(false)
+  const [editedTitle, setEditedTitle] = useState('')
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
@@ -67,6 +70,24 @@ function App() {
     setPassword('')
     setGiftLists([])
     setSelectedList(null)
+  }
+
+  const handleSaveTitle = () => {
+    if (selectedList && editedTitle.trim() !== '') {
+      const updatedLists = giftLists.map((list) =>
+        list.id === selectedList.id ? { ...list, title: editedTitle } : list
+      )
+      setGiftLists(updatedLists)
+      setSelectedList({ ...selectedList, title: editedTitle })
+      setIsEditingTitle(false)
+    }
+  }
+
+  const handleDeleteList = () => {
+    if (selectedList && confirm('¿Estás seguro de que quieres eliminar esta lista?')) {
+      setGiftLists((prevLists) => prevLists.filter((list) => list.id !== selectedList.id))
+      setSelectedList(null)
+    }
   }
 
   return (
@@ -180,22 +201,26 @@ function App() {
             )}
 
             <div className="card-container">
-              <div className="card" onClick={() => handleCardClick('Gift List')}>
-                <img src="/gift.png" alt="Gift" />
-                <p>Create a Gift List</p>
-              </div>
-              <div className="card" onClick={() => handleCardClick('Wedding Registry')}>
-                <img src="/wedding.png" alt="Wedding Rings" />
-                <p>Create a Wedding Registry</p>
-              </div>
-              <div className="card" onClick={() => handleCardClick('Baby Registry')}>
-                <img src="/baby.png" alt="Baby Toy" />
-                <p>Create a Baby Registry</p>
-              </div>
-              <div className="card" onClick={() => handleCardClick('Nonprofit Gift List')}>
-                <img src="/heart.png" alt="Hearts" />
-                <p>Create a Nonprofit Gift List</p>
-              </div>
+              {[
+                { src: "/gift.png", label: "Create a Gift List", type: "Gift List" },
+                { src: "/wedding.png", label: "Create a Wedding Registry", type: "Wedding Registry" },
+                { src: "/baby.png", label: "Create a Baby Registry", type: "Baby Registry" },
+                { src: "/heart.png", label: "Create a Nonprofit Gift List", type: "Nonprofit Gift List" },
+              ].map((card) => (
+                <motion.div
+                  key={card.type}
+                  className="card"
+                  onClick={() => handleCardClick(card.type)}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <img src={card.src} alt={card.label} />
+                  <p>{card.label}</p>
+                </motion.div>
+              ))}
             </div>
 
             {authenticatedEmail && giftLists.length > 0 && (
@@ -258,22 +283,66 @@ function App() {
 
         {selectedList && (
           <div className="login-container">
-            <h2>{selectedList.title}</h2>
-            {selectedList.items.length === 0 ? (
-              <p>La lista está vacía. ¡Empieza a agregar productos!</p>
+            {isEditingTitle ? (
+              <>
+                <input
+                  type="text"
+                  value={editedTitle}
+                  onChange={(e) => setEditedTitle(e.target.value)}
+                  style={{ background: 'white', color: 'black', fontSize: '1.2rem', padding: '0.5rem', marginBottom: '1rem' }}
+                />
+                <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                  <button onClick={handleSaveTitle}
+                  style={{ background: 'green', color: 'white' }}
+                  >Guardar</button>
+                  <button
+                    onClick={() => {
+                      setIsEditingTitle(false)
+                      setEditedTitle('')
+                    }}
+                    style={{ background: 'red', color: '#333' }}
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </>
             ) : (
-              <ul>
-                {selectedList.items.map((item, index) => (
-                  <li key={index}>{item}</li>
-                ))}
-              </ul>
+              <>
+                <h2 style={{color: 'black'}}>{selectedList.title}</h2>
+                <p style={{color: 'black'}}>Tipo de lista: {selectedList.type}</p>
+                {selectedList.items.length === 0 ? (
+                  <p style={{color: 'black'}}>La lista está vacía. ¡Empieza a agregar productos!</p>
+                ) : (
+                  <ul>
+                    {selectedList.items.map((item, index) => (
+                      <li key={index}>{item}</li>
+                    ))}
+                  </ul>
+                )}
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginTop: '1rem' }}>
+                  <button
+                    onClick={() => setSelectedList(null)}
+                    style={{ background: '#ccc', color: '#333' }}
+                  >
+                    Volver al inicio
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsEditingTitle(true)
+                      setEditedTitle(selectedList.title)
+                    }}
+                  >
+                    Editar Título
+                  </button>
+                  <button
+                    onClick={handleDeleteList}
+                    style={{ backgroundColor: 'red', color: 'white' }}
+                  >
+                    Eliminar
+                  </button>
+                </div>
+              </>
             )}
-            <button
-              onClick={() => setSelectedList(null)}
-              style={{ marginTop: '1rem', background: '#ccc', color: '#333' }}
-            >
-              Volver al inicio
-            </button>
           </div>
         )}
       </main>
