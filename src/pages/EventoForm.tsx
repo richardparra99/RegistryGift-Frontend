@@ -1,0 +1,177 @@
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router";
+import { EventService } from "../services/EventService";
+import { URLS } from "../navigation/CONSTANTS";
+import { Container } from "../components/Container";
+import { Menu } from "../components/Menu";
+
+const EVENTO_TYPE_LABELS: Record<string, string> = {
+  birthday: "Cumpleaños",
+  wedding: "Matrimonio",
+  anniversary: "Aniversario",
+  other: "Otro",
+};
+
+const EVENTO_COLOR_LABELS: Record<string, string> = {
+  red: "Rojo",
+  blue: "Azul",
+  green: "Verde",
+  orange: "Naranja",
+  purple: "Morado",
+};
+
+const EventoForm = () => {
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [datetime, setDatetime] = useState("");
+  const [type, setType] = useState<"birthday" | "wedding" | "anniversary" | "other">("birthday");
+  const [color, setColor] = useState<"red" | "blue" | "green" | "orange" | "purple">("red");
+  const [isPrivate, setIsPrivate] = useState(false);
+  const [error, setError] = useState("");
+
+  const navigate = useNavigate();
+  const { id } = useParams();
+  const isEditMode = Boolean(id);
+
+  useEffect(() => {
+    if (isEditMode && id) {
+      EventService.get(parseInt(id))
+        .then((evento) => {
+          setName(evento.name);
+          setDescription(evento.description || "");
+          setDatetime(evento.datetime.slice(0, 10));
+          setType(evento.type && Object.keys(EVENTO_TYPE_LABELS).includes(evento.type) ? evento.type : "other");
+          setIsPrivate(Boolean(evento.private));
+        })
+        .catch(() => setError("No se pudo cargar el evento."));
+    }
+  }, [id, isEditMode]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!name.trim() || !datetime || !type || !color) {
+      setError("Todos los campos obligatorios deben ser completados.");
+      return;
+    }
+
+    try {
+      const data = {
+        name,
+        description,
+        datetime,
+        type,
+        color,
+        private: isPrivate,
+      };
+
+      let res;
+
+      if (isEditMode && id) {
+        await EventService.update(parseInt(id), data);
+        navigate(URLS.APP.DETAIL.replace(":id", id));
+      } else {
+        res = await EventService.create(data);
+        navigate(URLS.APP.DETAIL.replace(":id", res.id.toString()));
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Ocurrió un error al guardar el evento.");
+    }
+  };
+
+  return (
+    <>
+      <Menu />
+      <Container>
+        <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded shadow-md">
+          <h2 className="text-xl font-bold mb-4">
+            {isEditMode ? "Editar Evento" : "Crear Nuevo Evento"}
+          </h2>
+          <form onSubmit={handleSubmit}>
+            <div className="mb-4">
+              <label className="block font-semibold mb-1">Nombre</label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full px-3 py-2 border rounded"
+                required
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block font-semibold mb-1">Descripción</label>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="w-full px-3 py-2 border rounded"
+                rows={3}
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block font-semibold mb-1">Fecha</label>
+              <input
+                type="date"
+                value={datetime}
+                onChange={(e) => setDatetime(e.target.value)}
+                className="w-full px-3 py-2 border rounded"
+                required
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block font-semibold mb-1">Tipo de Evento</label>
+              <select
+                value={type}
+                onChange={(e) => setType(e.target.value as any)}
+                className="w-full px-3 py-2 border rounded"
+                required
+              >
+                {Object.entries(EVENTO_TYPE_LABELS).map(([key, label]) => (
+                  <option key={key} value={key}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="mb-4">
+              <label className="block font-semibold mb-1">Color de Evento</label>
+              <select
+                value={color}
+                onChange={(e) => setColor(e.target.value as any)}
+                className="w-full px-3 py-2 border rounded"
+                required
+              >
+                {Object.entries(EVENTO_COLOR_LABELS).map(([key, label]) => (
+                  <option key={key} value={key}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="mb-4 flex items-center space-x-2">
+              <input
+                id="private"
+                type="checkbox"
+                checked={isPrivate}
+                onChange={(e) => setIsPrivate(e.target.checked)}
+                className="rounded"
+              />
+              <label htmlFor="private" className="font-semibold">
+                Evento privado
+              </label>
+            </div>
+            {error && <p className="text-red-500 mb-4">{error}</p>}
+            <button
+              type="submit"
+              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            >
+              {isEditMode ? "Guardar Cambios" : "Crear"}
+            </button>
+          </form>
+        </div>
+      </Container>
+    </>
+  );
+};
+
+export default EventoForm;
