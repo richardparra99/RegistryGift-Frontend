@@ -17,6 +17,14 @@ const EVENTO_TYPE_LABELS: Record<string, string> = {
   other: "Otro",
 };
 
+const EVENTO_COLOR_CLASSES: Record<string, string> = {
+  red: "bg-red-100 border-red-400 text-red-700",
+  blue: "bg-blue-100 border-blue-400 text-blue-700",
+  green: "bg-green-100 border-green-400 text-green-700",
+  orange: "bg-orange-100 border-orange-400 text-orange-700",
+  purple: "bg-purple-100 border-purple-400 text-purple-700",
+};
+
 const EventoDetail = () => {
   const { id } = useParams<{ id: string }>();
   const [evento, setEvento] = useState<Event | null>(null);
@@ -42,12 +50,13 @@ const EventoDetail = () => {
       CommentService.listByEvent(Number(id))
         .then(setComentarios)
         .catch((err) => {
-          console.error("Error al obtener regalos:", err);
+          console.error("Error al obtener comentarios:", err);
         });
     }
   }, [id]);
 
   const isOwner = evento && user?.id === (typeof evento.owner === "object" ? evento.owner.id : evento.owner);
+
   const handleRegaloReservar = async (regalo_id: number) => {
     try {
       await GiftService.reserve(Number(regalo_id))
@@ -61,8 +70,7 @@ const EventoDetail = () => {
 
     try {
       await CommentService.create({ text: nuevoComentario, event_id: evento.id });
-
-      setComentarios(await CommentService.listByEvent(evento.id))
+      setComentarios(await CommentService.listByEvent(evento.id));
       setNuevoComentario("");
     } catch (err) {
       console.error("Error al enviar comentario:", err);
@@ -83,26 +91,37 @@ const EventoDetail = () => {
   return (
     <>
       <Menu />
-      <Container className="max-w-3xl mx-auto mt-10 bg-white p-6 rounded-xl shadow-md space-y-10">
+      <Container
+        className={`max-w-3xl mx-auto mt-10 p-6 rounded-xl shadow-md space-y-10 border-l-8 ${
+          EVENTO_COLOR_CLASSES[evento.color] ?? "bg-white border-gray-300 text-gray-700"
+        }`}
+      >
         <div>
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-3xl font-bold">{evento.name}</h1>
             {isOwner && (
-              <>
-                <button
-                  onClick={() => navigate(URLS.APP.EDIT.replace(":id", evento.id.toString()))}
-                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow"
-                >
+              <button
+                onClick={() => navigate(URLS.APP.EDIT.replace(":id", evento.id.toString()))}
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow"
+              >
                 Editar
-                </button>
-              </>
+              </button>
             )}
           </div>
-          <p className="text-sm">Creado por: {typeof evento.owner === "object" ? evento.owner.username : "Desconocido"}</p>
-          <h2 className="text-gray-700 mb-4 font-semibold">
-            {EVENTO_TYPE_LABELS[evento.type] ?? evento.type} - {new Date(evento.datetime).toLocaleDateString()}
-          </h2>
-          <p className="text-gray-700 mb-2">
+          <div className="flex items-center space-x-2 mb-2">
+            <span className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${
+              EVENTO_COLOR_CLASSES[evento.color] ?? "bg-gray-100 text-gray-700"
+            }`}>
+              {EVENTO_TYPE_LABELS[evento.type]}
+            </span>
+            <span className="text-sm text-gray-600">
+              {new Date(evento.datetime).toLocaleDateString()}
+            </span>
+          </div>
+          <p className="text-sm text-gray-700 mb-4">
+            Creado por: {typeof evento.owner === "object" ? evento.owner.username : "Desconocido"}
+          </p>
+          <p className="text-gray-800">
             {evento.description || "Sin descripción"}
           </p>
         </div>
@@ -130,12 +149,14 @@ const EventoDetail = () => {
                     <p className="font-semibold">{regalo.name}</p>
                     <p className="text-sm text-gray-600">{regalo.description}</p>
                     <p className="text-sm text-gray-600">Cantidad: {regalo.quantity}</p>
-                      {regalo.reference_link && (
-                        <p className="text-sm text-gray-600">Enlace: <a href={regalo.reference_link} target="_blank" rel="noopener noreferrer">{regalo.reference_link}</a></p>
-                      )}
-                      {regalo.priority && (
-                        <p className="text-sm text-gray-600">Prioridad: {regalo.priority}</p>
-                      )}
+                    {regalo.reference_link && (
+                      <p className="text-sm text-gray-600">
+                        Enlace: <a href={regalo.reference_link} target="_blank" rel="noopener noreferrer" className="underline">{regalo.reference_link}</a>
+                      </p>
+                    )}
+                    {regalo.priority && (
+                      <p className="text-sm text-gray-600">Prioridad: {regalo.priority}</p>
+                    )}
                   </div>
                   {isOwner && (
                     <div className="space-x-2">
@@ -204,7 +225,6 @@ const EventoDetail = () => {
               ))}
             </ul>
           )}
-          
         </div>
       </Container>
     </>
