@@ -19,6 +19,11 @@ const EVENTO_COLOR_CLASSES: Record<string, string> = {
   green: "border-green-400 hover:bg-green-50",
   orange: "border-orange-400 hover:bg-orange-50",
   purple: "border-purple-400 hover:bg-purple-50",
+  yellow: "border-yellow-400 hover:bg-yellow-50",
+  pink: "border-pink-400 hover:bg-pink-50",
+  gray: "border-gray-400 hover:bg-gray-50",
+  teal: "border-teal-400 hover:bg-teal-50",
+  brown: "border-amber-700 hover:bg-amber-50",
 };
 
 const EventoList = () => {

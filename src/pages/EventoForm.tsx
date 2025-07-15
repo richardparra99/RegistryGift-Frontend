@@ -18,6 +18,11 @@ const EVENTO_COLOR_LABELS: Record<string, string> = {
   green: "Verde",
   orange: "Naranja",
   purple: "Morado",
+  yellow: "Amarillo",
+  pink: "Rosa",
+  gray: "Gris",
+  teal: "Turquesa",
+  brown: "Marrón",
 };
 
 const EventoForm = () => {
@@ -25,7 +30,7 @@ const EventoForm = () => {
   const [description, setDescription] = useState("");
   const [datetime, setDatetime] = useState("");
   const [type, setType] = useState<"birthday" | "wedding" | "anniversary" | "other">("birthday");
-  const [color, setColor] = useState<"red" | "blue" | "green" | "orange" | "purple">("red");
+  const [color, setColor] = useState<"red" | "blue" | "green" | "orange" | "purple" | "yellow" | "pink" | "gray" | "teal" | "brown">("red");
   const [isPrivate, setIsPrivate] = useState(false);
   const [error, setError] = useState("");
 
@@ -41,6 +46,7 @@ const EventoForm = () => {
           setDescription(evento.description || "");
           setDatetime(evento.datetime.slice(0, 10));
           setType(evento.type && Object.keys(EVENTO_TYPE_LABELS).includes(evento.type) ? evento.type : "other");
+          setColor(evento.color && Object.keys(EVENTO_COLOR_LABELS).includes(evento.color) ? evento.color : "red");
           setIsPrivate(Boolean(evento.private));
         })
         .catch(() => setError("No se pudo cargar el evento."));

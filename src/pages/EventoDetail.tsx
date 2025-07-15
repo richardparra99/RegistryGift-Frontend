@@ -18,11 +18,16 @@ const EVENTO_TYPE_LABELS: Record<string, string> = {
 };
 
 const EVENTO_COLOR_CLASSES: Record<string, string> = {
-  red: "bg-red-100 border-red-400 text-red-700",
-  blue: "bg-blue-100 border-blue-400 text-blue-700",
-  green: "bg-green-100 border-green-400 text-green-700",
-  orange: "bg-orange-100 border-orange-400 text-orange-700",
-  purple: "bg-purple-100 border-purple-400 text-purple-700",
+  red: "border-red-400 hover:bg-red-50",
+  blue: "border-blue-400 hover:bg-blue-50",
+  green: "border-green-400 hover:bg-green-50",
+  orange: "border-orange-400 hover:bg-orange-50",
+  purple: "border-purple-400 hover:bg-purple-50",
+  yellow: "border-yellow-400 hover:bg-yellow-50",
+  pink: "border-pink-400 hover:bg-pink-50",
+  gray: "border-gray-400 hover:bg-gray-50",
+  teal: "border-teal-400 hover:bg-teal-50",
+  brown: "border-amber-700 hover:bg-amber-50",
 };
 
 const EventoDetail = () => {
