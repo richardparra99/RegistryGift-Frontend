@@ -6,6 +6,7 @@ import { AuthService } from "../services/AuthService";
 
 export const Menu = () => {
   const [showMenu, setShowMenu] = useState(false);
+  const [theme, setTheme] = useState("default"); // 👈 agregado
   const navigate = useNavigate();
 
   const token = localStorage.getItem("access_token");
@@ -40,15 +41,24 @@ export const Menu = () => {
   const changeTheme = (theme: string) => {
     localStorage.setItem("theme", theme);
     document.body.className = `theme-${theme}`;
+    setTheme(theme);
   };
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme") || "default";
     document.body.className = `theme-${savedTheme}`;
+    setTheme(savedTheme);
   }, []);
 
+  // Clase dinámica del navbar
+  const navbarClass = theme === "blue"
+    ? "bg-[#192734]"
+    : theme === "dark"
+    ? "bg-[#0a0a0a]"
+    : "bg-black";
+
   return (
-    <nav className="bg-black shadow-md">
+    <nav className={`${navbarClass} shadow-md`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
