@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { BsChevronDown, BsList } from "react-icons/bs";
 import { URLS } from "../navigation/CONSTANTS";
@@ -36,6 +36,17 @@ export const Menu = () => {
     }
   };
 
+  // Tema
+  const changeTheme = (theme: string) => {
+    localStorage.setItem("theme", theme);
+    document.body.className = `theme-${theme}`;
+  };
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme") || "default";
+    document.body.className = `theme-${savedTheme}`;
+  }, []);
+
   return (
     <nav className="bg-black shadow-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -66,6 +77,39 @@ export const Menu = () => {
                 </Link>
               </>
             )}
+            {/* TEMA */}
+            <div className="relative group">
+              <button
+                onClick={() => toggleSubMenu("themeMenu")}
+                className="text-white hover:text-blue-600 flex items-center"
+              >
+                Tema <BsChevronDown size={10} className="inline ml-1" />
+              </button>
+              <div
+                id="themeMenu"
+                className="absolute hidden bg-white shadow-md mt-2 rounded-md z-10 min-w-[150px]"
+              >
+                <button
+                  onClick={() => changeTheme("blue")}
+                  className="block w-full text-left hover:bg-gray-100 py-2 px-4"
+                >
+                  Azul Oscuro
+                </button>
+                <button
+                  onClick={() => changeTheme("dark")}
+                  className="block w-full text-left hover:bg-gray-100 py-2 px-4"
+                >
+                  Negro Opaco
+                </button>
+                <button
+                  onClick={() => changeTheme("default")}
+                  className="block w-full text-left hover:bg-gray-100 py-2 px-4"
+                >
+                  Normal
+                </button>
+              </div>
+            </div>
+
             {!token ? (
               <>
                 <Link to={URLS.LOGIN} className="text-white hover:text-blue-600">
@@ -85,11 +129,11 @@ export const Menu = () => {
                 </button>
                 <div
                   id="authMenu"
-                  className="absolute hidden bg-white shadow-md mt-2 rounded-md z-10 min-w-[160px]"
+                  className="absolute hidden bg-white shadow-md mt-2 rounded-md z-10 min-w-[119px]"
                 >
                   <button
                     onClick={onLogoutClick}
-                    className="block w-full text-start px-4 py-2 text-gray-800 hover:bg-gray-100"
+                    className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-3 rounded shadow transition"
                   >
                     Cerrar sesión
                   </button>

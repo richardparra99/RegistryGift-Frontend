@@ -8,7 +8,7 @@ import { URLS } from "../navigation/CONSTANTS";
 import { AuthService } from "../services/AuthService";
 import { Container } from "../components/Container";
 import { useState } from "react";
-import { GuestMenu } from "../components/GuestMenu";
+import { Menu } from "../components/Menu"; // 👈 CAMBIO
 
 type Inputs = {
 	username: string;
@@ -42,7 +42,7 @@ export const RegisterForm = () => {
 
 	return (
 		<>
-			<GuestMenu />
+			<Menu /> {/* 👈 AQUÍ SOLO CAMBIÓ */}
 			<Container>
 				<Card title="Registro" className="mx-5 my-5">
 					<form onSubmit={handleSubmit(onSubmit)}>

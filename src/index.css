@@ -3,3 +3,18 @@
 .formfield span{
     color: red
 }
+
+body.theme-default {
+  background-color: white;
+  color: black;
+}
+
+body.theme-blue {
+  background-color: #15202b;
+  color: #e1e8ed;
+}
+
+body.theme-dark {
+  background-color: #0a0a0a;
+  color: #f0f0f0;
+}
