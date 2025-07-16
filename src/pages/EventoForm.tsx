@@ -90,46 +90,50 @@ const EventoForm = () => {
     <>
       <Menu />
       <Container>
-        <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded shadow-md">
-          <h2 className="text-xl font-bold mb-4">
+        <div className="max-w-md mx-auto mt-10 p-8 bg-white rounded-2xl shadow-lg">
+          <h2 className="text-2xl font-bold mb-6 text-center">
             {isEditMode ? "Editar Evento" : "Crear Nuevo Evento"}
           </h2>
-          <form onSubmit={handleSubmit}>
-            <div className="mb-4">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
               <label className="block font-semibold mb-1">Nombre</label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full px-3 py-2 border rounded"
+                className="w-full px-4 py-2 border rounded-lg shadow transition transform 
+                hover:scale-105 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400"
                 required
               />
             </div>
-            <div className="mb-4">
+            <div>
               <label className="block font-semibold mb-1">Descripción</label>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="w-full px-3 py-2 border rounded"
+                className="w-full px-4 py-2 border rounded-lg shadow transition transform 
+                hover:scale-105 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400"
                 rows={3}
               />
             </div>
-            <div className="mb-4">
+            <div>
               <label className="block font-semibold mb-1">Fecha</label>
               <input
                 type="date"
                 value={datetime}
                 onChange={(e) => setDatetime(e.target.value)}
-                className="w-full px-3 py-2 border rounded"
+                className="w-full px-4 py-2 border rounded-lg shadow transition transform 
+                hover:scale-105 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400"
                 required
               />
             </div>
-            <div className="mb-4">
+            <div>
               <label className="block font-semibold mb-1">Tipo de Evento</label>
               <select
                 value={type}
                 onChange={(e) => setType(e.target.value as any)}
-                className="w-full px-3 py-2 border rounded"
+                className="w-full px-4 py-2 border rounded-lg shadow transition transform 
+                hover:scale-105 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400"
                 required
               >
                 <option value="">Seleccionar tipo</option>
@@ -140,12 +144,13 @@ const EventoForm = () => {
                 ))}
               </select>
             </div>
-            <div className="mb-4">
+            <div>
               <label className="block font-semibold mb-1">Color de Evento</label>
               <select
                 value={color}
                 onChange={(e) => setColor(e.target.value as any)}
-                className="w-full px-3 py-2 border rounded"
+                className="w-full px-4 py-2 border rounded-lg shadow transition transform 
+                hover:scale-105 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400"
                 required
               >
                 <option value="">Seleccionar color</option>
@@ -156,22 +161,23 @@ const EventoForm = () => {
                 ))}
               </select>
             </div>
-            <div className="mb-4 flex items-center space-x-2">
+            <div className="flex items-center space-x-2">
               <input
                 id="private"
                 type="checkbox"
                 checked={isPrivate}
                 onChange={(e) => setIsPrivate(e.target.checked)}
-                className="rounded"
+                className="rounded focus:ring-2 focus:ring-blue-400 transition transform hover:scale-105"
               />
               <label htmlFor="private" className="font-semibold">
                 Evento privado
               </label>
             </div>
-            {error && <p className="text-red-500 mb-4">{error}</p>}
+            {error && <p className="text-red-500">{error}</p>}
             <button
               type="submit"
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg shadow transition 
+              transform hover:scale-105"
             >
               {isEditMode ? "Guardar Cambios" : "Crear"}
             </button>

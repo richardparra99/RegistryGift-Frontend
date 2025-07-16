@@ -18,12 +18,26 @@ const EventoMioList = () => {
   const [eventos, setEventos] = useState<Array<Event>>([]);
 
   useEffect(() => {
+    cargarMisEventos();
+  }, []);
+
+  const cargarMisEventos = () => {
     EventService.listMine()
       .then(setEventos)
       .catch((error) => {
         console.error("Error al obtener la lista de eventos: ", error);
       });
-  }, []);
+  };
+
+  const handleEliminar = async (id: number) => {
+    if (!window.confirm("¿Seguro que deseas eliminar este evento?")) return;
+    try {
+      await EventService.delete(id);
+      setEventos(eventos.filter(e => e.id !== id));
+    } catch (err) {
+      console.error("Error eliminando evento: ", err);
+    }
+  };
 
   return (
     <>
@@ -34,13 +48,23 @@ const EventoMioList = () => {
           {eventos.map((evento) => (
             <li
               key={evento.id}
-              onClick={() => navigate(URLS.APP.DETAIL.replace(":id", evento.id.toString()))}
-              className="cursor-pointer bg-white rounded-md shadow-sm mb-4 px-5 py-3 hover:bg-gray-50 transition-colors"
+              className="bg-white rounded-md shadow-sm mb-4 px-5 py-3 transition duration-300 transform hover:scale-105 hover:shadow-lg flex justify-between items-center"
             >
-              <div className="font-semibold">{evento.name}</div>
-              <div className="text-sm text-gray-500">
-                {new Date(evento.datetime).toLocaleDateString()} &mdash; {EVENTO_TYPE_LABELS[evento.type] ?? evento.type}
+              <div
+                onClick={() => navigate(URLS.APP.DETAIL.replace(":id", evento.id.toString()))}
+                className="cursor-pointer"
+              >
+                <div className="font-semibold">{evento.name}</div>
+                <div className="text-sm text-gray-500">
+                  {new Date(evento.datetime).toLocaleDateString()} &mdash; {EVENTO_TYPE_LABELS[evento.type] ?? evento.type}
+                </div>
               </div>
+              <button
+                onClick={() => handleEliminar(evento.id)}
+                className="ml-4 bg-red-600 hover:bg-red-700 text-white text-sm px-3 py-1 rounded shadow transition"
+              >
+                Eliminar
+              </button>
             </li>
           ))}
         </ul>
