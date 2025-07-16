@@ -8,8 +8,6 @@ import { Container } from "../components/Container";
 import { Menu } from "../components/Menu";
 import { URLS } from "../navigation/CONSTANTS";
 
-const user = JSON.parse(localStorage.getItem("user") || "{}");
-
 const EVENTO_TYPE_LABELS: Record<string, string> = {
   birthday: "Cumpleaños",
   wedding: "Matrimonio",
@@ -36,6 +34,9 @@ const EventoDetail = () => {
   const [regalos, setRegalos] = useState<any[]>([]);
   const [comentarios, setComentarios] = useState<any[]>([]);
   const [nuevoComentario, setNuevoComentario] = useState("");
+  const [user, setUser] = useState<any>(null);
+  const [editComentarioId, setEditComentarioId] = useState<number | null>(null);
+  const [editComentarioText, setEditComentarioText] = useState<string>("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -58,6 +59,8 @@ const EventoDetail = () => {
           console.error("Error al obtener comentarios:", err);
         });
     }
+
+    setUser(JSON.parse(localStorage.getItem("user") || "null"));
   }, [id]);
 
   const isOwner = evento && user?.id === (typeof evento.owner === "object" ? evento.owner.id : evento.owner);
@@ -70,6 +73,18 @@ const EventoDetail = () => {
     }
   }
 
+  const handleRegaloEliminar = async (regalo_id: number, regalo_name: string) => {
+    const confirmar = window.confirm(`¿Eliminar "${regalo_name}"?`);
+    if (!confirmar) return;
+
+    try {
+      await GiftService.delete(regalo_id);
+      setRegalos((prev) => prev.filter((r) => r.id !== regalo_id));
+    } catch (err) {
+      console.error("Error eliminando regalo:", err);
+    }
+  };
+
   const handleComentarioSubmit = async () => {
     if (!nuevoComentario.trim()) return;
 
@@ -81,6 +96,37 @@ const EventoDetail = () => {
       console.error("Error al enviar comentario:", err);
     }
   }
+
+  const handleComentarioEliminar = async (comentario_id: number) => {
+    const confirmar = window.confirm("¿Eliminar este comentario?");
+    if (!confirmar) return;
+
+    try {
+      await CommentService.delete(comentario_id);
+      setComentarios((prev) => prev.filter((c) => c.id !== comentario_id));
+    } catch (err) {
+      console.error("Error eliminando comentario:", err);
+    }
+  };
+
+  const handleComentarioEditStart = (comentarioId: number, currentText: string) => {
+    setEditComentarioId(comentarioId);
+    setEditComentarioText(currentText);
+  };
+
+  const handleComentarioEditSubmit = async () => {
+    if (!editComentarioText.trim() || !editComentarioId) return;
+
+    try {
+      await CommentService.update(editComentarioId, { text: editComentarioText });
+      setComentarios(await CommentService.listByEvent(evento.id));
+      setEditComentarioId(null);
+      setEditComentarioText("");
+    } catch (err) {
+      console.error("Error actualizando comentario:", err);
+    }
+  };
+
 
   if (!evento) {
     return (
@@ -172,7 +218,7 @@ const EventoDetail = () => {
                         Editar
                       </button>
                       <button
-                        onClick={() => alert("Eliminar regalo no implementado aún~")}
+                        onClick={() => handleRegaloEliminar(regalo.id, regalo.name)}
                         className="text-red-600 hover:underline text-sm"
                       >
                         Eliminar
@@ -220,14 +266,73 @@ const EventoDetail = () => {
             <p className="text-gray-500">Sin comentarios aún.</p>
           ) : (
             <ul className="space-y-2 mb-4">
-              {comentarios.map((comentario) => (
-                <li key={comentario.id} className="border p-3 rounded">
-                  <p className="text-sm text-gray-800">{comentario.text}</p>
-                  <p className="text-xs text-gray-400 text-right">
-                    {new Date(evento.datetime).toLocaleString()} | {comentario.poster?.username || "Anónimo"}
-                  </p>
-                </li>
-              ))}
+              {comentarios.map((comentario) => {
+                const puedeModificar = user && (
+                  comentario.poster?.id === user.id ||
+                  (evento && user.id === (typeof evento.owner === "object" ? evento.owner.id : evento.owner))
+                );
+
+                const isEditing = editComentarioId === comentario.id;
+
+                return (
+                  <li key={comentario.id} className="border p-3 rounded">
+                    {isEditing ? (
+                      <>
+                        <textarea
+                          className="w-full border px-2 py-1 rounded text-sm"
+                          value={editComentarioText}
+                          onChange={(e) => setEditComentarioText(e.target.value)}
+                          rows={2}
+                        />
+                        <div className="mt-2 flex justify-end gap-2">
+                          <button
+                            onClick={handleComentarioEditSubmit}
+                            className="text-green-600 text-xs hover:underline"
+                          >
+                            Actualizar
+                          </button>
+                          <button
+                            onClick={() => setEditComentarioId(null)}
+                            className="text-gray-500 text-xs hover:underline"
+                          >
+                            Cancelar
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-sm text-gray-800">{comentario.text}</p>
+                        <div className="flex justify-between items-center mt-2">
+                          <p className="text-xs text-gray-400">
+                            {new Date(evento.datetime).toLocaleString()} | {comentario.poster?.username || "Anónimo"}
+                          </p>
+                          <div className="flex gap-2 text-xs">
+                            {user?.id === comentario.poster?.id && (
+                              <button
+                                onClick={() => {
+                                  setEditComentarioId(comentario.id);
+                                  handleComentarioEditStart(comentario.id, comentario.text);
+                                }}
+                                className="text-blue-500 hover:underline"
+                              >
+                                Editar
+                              </button>
+                            )}
+                            {puedeModificar && (
+                              <button
+                                onClick={() => handleComentarioEliminar(comentario.id)}
+                                className="text-red-500 hover:underline"
+                              >
+                                Eliminar
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
           )}
         </div>
