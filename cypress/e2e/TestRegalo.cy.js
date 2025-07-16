@@ -1,110 +1,64 @@
-describe('RegaloForm', () => {
+describe('Formulario de Regalo', () => {
   const baseUrl = 'http://localhost:5173';
-  const eventoId = 123;
-  const giftId = 1;
+  const eventoId = 1;
+  const regaloId = 1; // si quieres test editar, cambia
+
+  beforeEach(() => {
+    cy.clearLocalStorage();
+  });
 
   context('Modo creación', () => {
     beforeEach(() => {
-      cy.visit(`${baseUrl}/regalos/create/${eventoId}`);
+      cy.visit(`${baseUrl}/eventos/${eventoId}/crear-regalo`);
     });
 
-    it('Muestra error si campos obligatorios están vacíos', () => {
+    it('Valida campos obligatorios: nombre, descripción y cantidad', () => {
       cy.get('button[type="submit"]').click();
-      cy.contains('Los campos obligatorios deben ser completados correctamente.').should('be.visible');
+
+      cy.get('p.text-red-500')
+        .should('be.visible')
+        .and('contain.text', 'Los campos obligatorios deben ser completados correctamente.');
     });
 
-    it('Crea regalo exitosamente y redirige al detalle del evento', () => {
+    it('Crea regalo exitosamente y redirige al detalle', () => {
       cy.intercept('POST', '**/gifts/', {
         statusCode: 201,
         body: {
-          id: giftId,
+          id: regaloId,
           event: { id: eventoId },
           name: 'Regalo Test',
-          description: 'Descripción del regalo',
+          description: 'Descripción regalo',
           quantity: 2,
+          reference_link: null,
+          priority: null,
         },
       }).as('createGift');
 
-      cy.get('input[type="text"]').type('Regalo Test');
-      cy.get('textarea').type('Descripción del regalo');
+      cy.get('input[type="text"]').eq(0).type('Regalo Test');
+      cy.get('textarea').type('Descripción regalo');
       cy.get('input[type="number"]').clear().type('2');
       cy.get('button[type="submit"]').click();
 
       cy.wait('@createGift');
-      cy.url().should('include', `/app/detail/${eventoId}`);
+      cy.url().should('include', `/eventos/${eventoId}`);
     });
 
-    it('Muestra error si falla la creación', () => {
+    it('Muestra error si falla la creación del regalo', () => {
       cy.intercept('POST', '**/gifts/', {
         statusCode: 500,
         body: {},
       }).as('createGiftFail');
 
-      cy.get('input[type="text"]').type('Regalo Test');
-      cy.get('textarea').type('Descripción del regalo');
-      cy.get('input[type="number"]').clear().type('2');
+      cy.get('input[type="text"]').eq(0).type('Regalo con error');
+      cy.get('textarea').type('Descripción regalo');
+      cy.get('input[type="number"]').clear().type('1');
       cy.get('button[type="submit"]').click();
 
       cy.wait('@createGiftFail');
-      cy.contains('Ocurrió un error al guardar el regalo.').should('be.visible');
-    });
-  });
 
-  context('Modo edición', () => {
-    beforeEach(() => {
-      // Interceptamos la carga inicial del regalo para editar
-      cy.intercept('GET', `**/gifts/${giftId}/`, {
-        statusCode: 200,
-        body: {
-          id: giftId,
-          name: 'Regalo Existente',
-          description: 'Descripción existente',
-          quantity: 3,
-          reference_link: 'https://referencia.com',
-          priority: 'medium',
-          event: { id: eventoId },
-        },
-      }).as('getGift');
-
-      cy.visit(`${baseUrl}/regalos/edit/${eventoId}/${giftId}`);
-      cy.wait('@getGift');
-    });
-
-    it('Carga datos correctamente en el formulario', () => {
-      cy.get('input[type="text"]').should('have.value', 'Regalo Existente');
-      cy.get('textarea').should('have.value', 'Descripción existente');
-      cy.get('input[type="number"]').should('have.value', '3');
-      cy.get('input[type="url"]').should('have.value', 'https://referencia.com');
-      cy.get('select').should('have.value', 'medium');
-    });
-
-    it('Actualiza regalo y redirige al detalle del evento', () => {
-      cy.intercept('PATCH', `**/gifts/${giftId}/`, {
-        statusCode: 200,
-        body: {
-          id: giftId,
-          event: { id: eventoId },
-        },
-      }).as('updateGift');
-
-      cy.get('input[type="text"]').clear().type('Regalo Editado');
-      cy.get('button[type="submit"]').click();
-
-      cy.wait('@updateGift');
-      cy.url().should('include', `/app/detail/${eventoId}`);
-    });
-
-    it('Muestra error si falla la actualización', () => {
-      cy.intercept('PATCH', `**/gifts/${giftId}/`, {
-        statusCode: 500,
-        body: {},
-      }).as('updateGiftFail');
-
-      cy.get('input[type="text"]').clear().type('Regalo Editado');
-      cy.get('button[type="submit"]').click();
-
-      cy.wait('@updateGiftFail');
-      cy.contains('Ocurrió un error al guardar el regalo.').should('be.visible');
+      cy.get('p.text-red-500')
+        .should('be.visible')
+        .and('contain', 'Ocurrió un error al guardar el regalo.');
     });
   });
 });

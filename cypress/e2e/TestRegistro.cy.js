@@ -1,6 +1,6 @@
 describe('Formulario de Registro', () => {
 	const baseUrl = 'http://localhost:5173';
-	const apiUrl = 'http://localhost:8000'; // Ajusta si es diferente
+	const apiUrl = 'http://localhost:8000'; 
 	const username = 'nuevo_usuario';
 	const email = 'nuevo@correo.com';
 	const password = 'claveSegura123';
