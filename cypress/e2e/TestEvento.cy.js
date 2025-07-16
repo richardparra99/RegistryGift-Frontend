@@ -1,7 +1,7 @@
 describe('Formulario de Evento', () => {
   const baseUrl = 'http://localhost:5173';
-  const eventId = 1; // Cambiado a 1
-
+  const eventId = 1; 
+  
   Cypress.Commands.add("login", (username = "test@test.com", password = "test") => {
     cy.request({
       method: "POST",

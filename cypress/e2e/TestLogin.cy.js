@@ -1,6 +1,6 @@
 describe('Login Form Validation and Authentication', () => {
-	const validUsername = 'testuser';
-	const validPassword = 'password123';
+	const validUsername = 'test@test.com';
+	const validPassword = 'test';
 
 	beforeEach(() => {
 		cy.visit('/login');
