@@ -1,9 +1,19 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useForm, SubmitHandler } from "react-hook-form";
 import { useNavigate, useParams } from "react-router";
 import { EventService } from "../services/EventService";
 import { URLS } from "../navigation/CONSTANTS";
 import { Container } from "../components/Container";
 import { Menu } from "../components/Menu";
+
+type FormValues = {
+  name: string;
+  description: string;
+  datetime: string;
+  type: string;
+  color: string;
+  isPrivate: boolean;
+};
 
 const EVENTO_TYPE_LABELS: Record<string, string> = {
   birthday: "Cumpleaños",
@@ -26,14 +36,14 @@ const EVENTO_COLOR_LABELS: Record<string, string> = {
 };
 
 const EventoForm = () => {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [datetime, setDatetime] = useState("");
-  const [type, setType] = useState<"" | "birthday" | "wedding" | "anniversary" | "other">("");
-  const [color, setColor] = useState<"" | "red" | "blue" | "green" | "orange" | "purple" | "yellow" | "pink" | "gray" | "teal" | "brown">("");
-  const [isPrivate, setIsPrivate] = useState(false);
-  const [error, setError] = useState("");
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm<FormValues>();
 
+  const [error, setError] = useState("");
   const navigate = useNavigate();
   const { id } = useParams();
   const isEditMode = Boolean(id);
@@ -42,42 +52,34 @@ const EventoForm = () => {
     if (isEditMode && id) {
       EventService.get(parseInt(id))
         .then((evento) => {
-          setName(evento.name);
-          setDescription(evento.description || "");
-          setDatetime(evento.datetime.slice(0, 10));
-          setType(EVENTO_TYPE_LABELS[evento.type] ? evento.type : "");
-          setColor(EVENTO_COLOR_LABELS[evento.color] ? evento.color : "");
-          setIsPrivate(Boolean(evento.private));
+          setValue("name", evento.name);
+          setValue("description", evento.description || "");
+          setValue("datetime", evento.datetime.slice(0, 10));
+          setValue("type", EVENTO_TYPE_LABELS[evento.type] ? evento.type : "");
+          setValue("color", EVENTO_COLOR_LABELS[evento.color] ? evento.color : "");
+          setValue("isPrivate", Boolean(evento.private));
         })
         .catch(() => setError("No se pudo cargar el evento."));
     }
-  }, [id, isEditMode]);
+  }, [id, isEditMode, setValue]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!name.trim() || !datetime || !type || !color) {
-      setError("Todos los campos obligatorios deben ser completados.");
-      return;
-    }
-
+  const onSubmit: SubmitHandler<FormValues> = async (data) => {
     try {
-      const data = {
-        name,
-        description,
-        datetime,
-        type,
-        color,
-        private: isPrivate,
+      const payload = {
+        name: data.name,
+        description: data.description,
+        datetime: data.datetime,
+        type: data.type,
+        color: data.color,
+        private: data.isPrivate,
       };
 
       let res;
-
       if (isEditMode && id) {
-        await EventService.update(parseInt(id), data);
+        await EventService.update(parseInt(id), payload);
         navigate(URLS.APP.DETAIL.replace(":id", id));
       } else {
-        res = await EventService.create(data);
+        res = await EventService.create(payload);
         navigate(URLS.APP.DETAIL.replace(":id", res.id.toString()));
       }
     } catch (err) {
@@ -94,47 +96,52 @@ const EventoForm = () => {
           <h2 className="text-2xl font-bold mb-6 text-center">
             {isEditMode ? "Editar Evento" : "Crear Nuevo Evento"}
           </h2>
-          <form onSubmit={handleSubmit} className="space-y-5">
+          {error && <p className="text-red-500 mb-4">{error}</p>}
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
             <div>
-              <label className="block font-semibold mb-1">Nombre</label>
+              <label className="block font-semibold mb-1" htmlFor="name">Nombre</label>
               <input
+                id="name"
                 type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full px-4 py-2 border rounded-lg shadow transition transform 
-                hover:scale-105 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                required
+                {...register("name", { required: true })}
+                className={`w-full px-4 py-2 border rounded-lg shadow transition transform hover:scale-105 hover:shadow-md focus:outline-none focus:ring-2 ${
+                  errors.name ? "border-red-500 focus:ring-red-400" : "focus:ring-blue-400"
+                }`}
               />
+              {errors.name && <p className="text-red-500 text-sm mt-1">Este campo es requerido</p>}
             </div>
+
             <div>
-              <label className="block font-semibold mb-1">Descripción</label>
+              <label className="block font-semibold mb-1" htmlFor="description">Descripción</label>
               <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="w-full px-4 py-2 border rounded-lg shadow transition transform 
-                hover:scale-105 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                id="description"
+                {...register("description")}
                 rows={3}
+                className="w-full px-4 py-2 border rounded-lg shadow transition transform hover:scale-105 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400"
               />
             </div>
+
             <div>
-              <label className="block font-semibold mb-1">Fecha</label>
+              <label className="block font-semibold mb-1" htmlFor="datetime">Fecha</label>
               <input
+                id="datetime"
                 type="date"
-                value={datetime}
-                onChange={(e) => setDatetime(e.target.value)}
-                className="w-full px-4 py-2 border rounded-lg shadow transition transform 
-                hover:scale-105 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                required
+                {...register("datetime", { required: true })}
+                className={`w-full px-4 py-2 border rounded-lg shadow transition transform hover:scale-105 hover:shadow-md focus:outline-none focus:ring-2 ${
+                  errors.datetime ? "border-red-500 focus:ring-red-400" : "focus:ring-blue-400"
+                }`}
               />
+              {errors.datetime && <p className="text-red-500 text-sm mt-1">Este campo es requerido</p>}
             </div>
+
             <div>
-              <label className="block font-semibold mb-1">Tipo de Evento</label>
+              <label className="block font-semibold mb-1" htmlFor="type">Tipo de Evento</label>
               <select
-                value={type}
-                onChange={(e) => setType(e.target.value as any)}
-                className="w-full px-4 py-2 border rounded-lg shadow transition transform 
-                hover:scale-105 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                required
+                id="type"
+                {...register("type", { required: true })}
+                className={`w-full px-4 py-2 border rounded-lg shadow transition transform hover:scale-105 hover:shadow-md focus:outline-none focus:ring-2 ${
+                  errors.type ? "border-red-500 focus:ring-red-400" : "focus:ring-blue-400"
+                }`}
               >
                 <option value="">Seleccionar tipo</option>
                 {Object.entries(EVENTO_TYPE_LABELS).map(([key, label]) => (
@@ -143,15 +150,17 @@ const EventoForm = () => {
                   </option>
                 ))}
               </select>
+              {errors.type && <p className="text-red-500 text-sm mt-1">Este campo es requerido</p>}
             </div>
+
             <div>
-              <label className="block font-semibold mb-1">Color de Evento</label>
+              <label className="block font-semibold mb-1" htmlFor="color">Color del Evento</label>
               <select
-                value={color}
-                onChange={(e) => setColor(e.target.value as any)}
-                className="w-full px-4 py-2 border rounded-lg shadow transition transform 
-                hover:scale-105 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                required
+                id="color"
+                {...register("color", { required: true })}
+                className={`w-full px-4 py-2 border rounded-lg shadow transition transform hover:scale-105 hover:shadow-md focus:outline-none focus:ring-2 ${
+                  errors.color ? "border-red-500 focus:ring-red-400" : "focus:ring-blue-400"
+                }`}
               >
                 <option value="">Seleccionar color</option>
                 {Object.entries(EVENTO_COLOR_LABELS).map(([key, label]) => (
@@ -160,24 +169,22 @@ const EventoForm = () => {
                   </option>
                 ))}
               </select>
+              {errors.color && <p className="text-red-500 text-sm mt-1">Este campo es requerido</p>}
             </div>
+
             <div className="flex items-center space-x-2">
               <input
-                id="private"
+                id="isPrivate"
                 type="checkbox"
-                checked={isPrivate}
-                onChange={(e) => setIsPrivate(e.target.checked)}
+                {...register("isPrivate")}
                 className="rounded focus:ring-2 focus:ring-blue-400 transition transform hover:scale-105"
               />
-              <label htmlFor="private" className="font-semibold">
-                Evento privado
-              </label>
+              <label htmlFor="isPrivate" className="font-semibold">Evento privado</label>
             </div>
-            {error && <p className="text-red-500">{error}</p>}
+
             <button
               type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg shadow transition 
-              transform hover:scale-105"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg shadow transition transform hover:scale-105"
             >
               {isEditMode ? "Guardar Cambios" : "Crear"}
             </button>
@@ -189,3 +196,4 @@ const EventoForm = () => {
 };
 
 export default EventoForm;
+

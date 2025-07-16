@@ -23,11 +23,17 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
-Cypress.Commands.add("loginMock", () => {
-  const accessToken = "fake-access-token";
-  const refreshToken = "fake-refresh-token";
+Cypress.Commands.add("login", () => {
+  const accessToken = "fake_access_token";
+  const refreshToken = "fake_refresh_token";
+  const user = {
+    id: 1,
+    username: "test@test.com",
+  };
 
-  window.localStorage.setItem("access_token", accessToken);
-  window.localStorage.setItem("refresh_token", refreshToken);
-  window.localStorage.setItem("user", JSON.stringify({ username: "test@test.com" }));
+  cy.window().then((win) => {
+    win.localStorage.setItem("access_token", accessToken);
+    win.localStorage.setItem("refresh_token", refreshToken);
+    win.localStorage.setItem("user", JSON.stringify(user));
+  });
 });
