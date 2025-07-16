@@ -16,16 +16,16 @@ const EVENTO_TYPE_LABELS: Record<string, string> = {
 };
 
 const EVENTO_COLOR_CLASSES: Record<string, string> = {
-  red: "border-red-400 hover:bg-red-50",
-  blue: "border-blue-400 hover:bg-blue-50",
-  green: "border-green-400 hover:bg-green-50",
-  orange: "border-orange-400 hover:bg-orange-50",
-  purple: "border-purple-400 hover:bg-purple-50",
-  yellow: "border-yellow-400 hover:bg-yellow-50",
-  pink: "border-pink-400 hover:bg-pink-50",
-  gray: "border-gray-400 hover:bg-gray-50",
-  teal: "border-teal-400 hover:bg-teal-50",
-  brown: "border-amber-700 hover:bg-amber-50",
+  red: "border-red-400 bg-red-50",
+  blue: "border-blue-400 bg-blue-50",
+  green: "border-green-400 bg-green-50",
+  orange: "border-orange-400 bg-orange-50",
+  purple: "border-purple-400 bg-purple-50",
+  yellow: "border-yellow-400 bg-yellow-50",
+  pink: "border-pink-400 bg-pink-50",
+  gray: "border-gray-400 bg-gray-50",
+  teal: "border-teal-400 bg-teal-50",
+  brown: "border-amber-700 bg-amber-50",
 };
 
 const EventoDetail = () => {
@@ -149,7 +149,7 @@ const EventoDetail = () => {
       >
         <div>
           <div className="flex items-center justify-between mb-4">
-            <h1 className="text-3xl font-bold">{evento.name}</h1>
+            <h1 style={{ color: evento.color }} className="text-3xl font-bold">{evento.name}</h1>
             {isOwner && (
               <button
                 onClick={() => navigate(URLS.APP.EDIT.replace(":id", evento.id.toString()))}
