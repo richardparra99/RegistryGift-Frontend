@@ -1,68 +1,79 @@
 import { apiClient } from "./interceptors";
 import type { User } from "../models/User";
+import axios from "axios";
 
 export class AuthService {
-    static async login(
-        username: string,
-        password: string
-    ): Promise<{ access: string; refresh: string; user: User }> {
-        try {
-            const response = await apiClient.post("token/", {
-                username,
-                password,
-            });
+	// LOGIN
+	static async login(
+		username: string,
+		password: string
+	): Promise<{ access: string; refresh: string; user: User }> {
+		try {
+			const response = await apiClient.post("token/", {
+				username,
+				password,
+			});
 
-            localStorage.setItem("access_token", response.data.access);
-            localStorage.setItem("refresh_token", response.data.refresh);
+			const access = response.data.access;
+			const refresh = response.data.refresh;
 
-            const userResponse = await this.me();
+			// Guardar en localStorage
+			localStorage.setItem("access_token", access);
+			localStorage.setItem("refresh_token", refresh);
 
-            localStorage.setItem("user", JSON.stringify(userResponse));
+			const user = await this.me();
+			localStorage.setItem("user", JSON.stringify(user));
 
-            return { ...response.data, user: userResponse };
-        } catch (error: unknown) {
-            if (error instanceof Error) {
-                throw new Error("Error al iniciar sesión: " + error.message);
-            }
-            throw new Error("Error al iniciar sesión: An unknown error occurred");
-        }
-    }
+			return { access, refresh, user };
+		} catch (error: any) {
+			// Si el error es de axios y tiene respuesta del servidor (como un 401), se lanza tal cual
+			if (axios.isAxiosError(error) && error.response) {
+				throw error; // ⬅ Esto permite que el componente maneje error.response.status === 401
+			}
 
-    static logout(): void {
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("refresh_token");
-        localStorage.removeItem("user");
-    }
+			// Otro tipo de error no manejado (sin response del backend)
+			throw new Error("Error al iniciar sesión");
+		}
+	}
 
-    static async register(
-        username: string,
-        email: string,
-        password: string
-    ): Promise<{ error?: string; message?: string }> {
-        try {
-            const response = await apiClient.post("auth/register/", {
-                username,
-                email,
-                password,
-            });
-            return response.data;
-        } catch (error: unknown) {
-            if (error instanceof Error) {
-                throw new Error("Error al registrar usuario: " + error.message);
-            }
-            throw new Error("Error al registrar usuario: An unknown error occurred");
-        }
-    }
+	// LOGOUT
+	static logout(): void {
+		localStorage.removeItem("access_token");
+		localStorage.removeItem("refresh_token");
+		localStorage.removeItem("user");
+	}
 
-    static async me(): Promise<User> {
-        try {
-            const response = await apiClient.get<User>("auth/me/");
-            return response.data;
-        } catch (error: unknown) {
-            if (error instanceof Error) {
-                throw new Error("Error al obtener usuario: " + error.message);
-            }
-            throw new Error("Error al obtener usuario: Se produjo un error desconocido");
-        }
-    }
+	// REGISTRO
+	static async register(
+		username: string,
+		email: string,
+		password: string
+	): Promise<{ error?: string; message?: string }> {
+		try {
+			const response = await apiClient.post("auth/register/", {
+				username,
+				email,
+				password,
+			});
+			return response.data;
+		} catch (error: any) {
+			if (axios.isAxiosError(error) && error.response?.data?.error) {
+				throw new Error("Error al registrar usuario: " + error.response.data.error);
+			}
+			throw new Error("Error al registrar usuario");
+		}
+	}
+
+	// OBTENER DATOS DEL USUARIO AUTENTICADO
+	static async me(): Promise<User> {
+		try {
+			const response = await apiClient.get<User>("auth/me/");
+			return response.data;
+		} catch (error: any) {
+			if (axios.isAxiosError(error) && error.response) {
+				throw error;
+			}
+			throw new Error("Error al obtener datos del usuario");
+		}
+	}
 }

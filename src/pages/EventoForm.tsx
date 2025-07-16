@@ -29,8 +29,8 @@ const EventoForm = () => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [datetime, setDatetime] = useState("");
-  const [type, setType] = useState<"birthday" | "wedding" | "anniversary" | "other">("birthday");
-  const [color, setColor] = useState<"red" | "blue" | "green" | "orange" | "purple" | "yellow" | "pink" | "gray" | "teal" | "brown">("red");
+  const [type, setType] = useState<"" | "birthday" | "wedding" | "anniversary" | "other">("");
+  const [color, setColor] = useState<"" | "red" | "blue" | "green" | "orange" | "purple" | "yellow" | "pink" | "gray" | "teal" | "brown">("");
   const [isPrivate, setIsPrivate] = useState(false);
   const [error, setError] = useState("");
 
@@ -45,8 +45,8 @@ const EventoForm = () => {
           setName(evento.name);
           setDescription(evento.description || "");
           setDatetime(evento.datetime.slice(0, 10));
-          setType(evento.type && Object.keys(EVENTO_TYPE_LABELS).includes(evento.type) ? evento.type : "other");
-          setColor(evento.color && Object.keys(EVENTO_COLOR_LABELS).includes(evento.color) ? evento.color : "red");
+          setType(EVENTO_TYPE_LABELS[evento.type] ? evento.type : "");
+          setColor(EVENTO_COLOR_LABELS[evento.color] ? evento.color : "");
           setIsPrivate(Boolean(evento.private));
         })
         .catch(() => setError("No se pudo cargar el evento."));
@@ -132,6 +132,7 @@ const EventoForm = () => {
                 className="w-full px-3 py-2 border rounded"
                 required
               >
+                <option value="">Seleccionar tipo</option>
                 {Object.entries(EVENTO_TYPE_LABELS).map(([key, label]) => (
                   <option key={key} value={key}>
                     {label}
@@ -147,6 +148,7 @@ const EventoForm = () => {
                 className="w-full px-3 py-2 border rounded"
                 required
               >
+                <option value="">Seleccionar color</option>
                 {Object.entries(EVENTO_COLOR_LABELS).map(([key, label]) => (
                   <option key={key} value={key}>
                     {label}

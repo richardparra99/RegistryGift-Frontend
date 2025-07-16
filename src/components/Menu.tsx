@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { BsChevronDown, BsList } from "react-icons/bs";
+import { BsChevronDown, BsList, BsMoon, BsSun } from "react-icons/bs";
 import { URLS } from "../navigation/CONSTANTS";
 import { AuthService } from "../services/AuthService";
 
 export const Menu = () => {
   const [showMenu, setShowMenu] = useState(false);
-  const [theme, setTheme] = useState("default"); // 👈 agregado
+  const [theme, setTheme] = useState("light");
   const navigate = useNavigate();
 
   const token = localStorage.getItem("access_token");
@@ -37,95 +37,68 @@ export const Menu = () => {
     }
   };
 
-  // Tema
   const changeTheme = (theme: string) => {
+    document.body.className = theme === "dark" ? "theme-dark dark" : "theme-light";
     localStorage.setItem("theme", theme);
-    document.body.className = `theme-${theme}`;
     setTheme(theme);
   };
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem("theme") || "default";
-    document.body.className = `theme-${savedTheme}`;
+    const savedTheme = localStorage.getItem("theme") || "light";
+    document.body.className = savedTheme === "dark" ? "theme-dark dark" : "theme-light";
     setTheme(savedTheme);
   }, []);
 
-  // Clase dinámica del navbar
-  const navbarClass = theme === "blue"
-    ? "bg-[#192734]"
-    : theme === "dark"
-    ? "bg-[#0a0a0a]"
-    : "bg-black";
+  const navbarClass = theme === "dark" ? "bg-black" : "bg-white";
+  const textColor = theme === "dark" ? "text-white" : "text-black";
+  const hoverColor = theme === "dark" ? "hover:text-blue-400" : "hover:text-blue-600";
 
   return (
     <nav className={`${navbarClass} shadow-md`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
-            <Link to={URLS.HOME} className="text-xl font-bold text-white">
+            <Link to={URLS.HOME} className={`text-xl font-bold ${textColor}`}>
               Gift Registry
             </Link>
           </div>
 
           <div className="flex items-center md:hidden">
-            <button onClick={toggleMenu} className="text-white focus:outline-none">
+            <button onClick={toggleMenu} className={`${textColor} focus:outline-none`}>
               <BsList />
             </button>
           </div>
 
           <div className="hidden md:flex items-center space-x-4">
-            <Link to={URLS.APP.LIST} className="text-white hover:text-blue-600">
+            <Link to={URLS.APP.LIST} className={`${textColor} ${hoverColor}`}>
               Eventos
             </Link>
             {token && (
               <>
-                <Link to={URLS.APP.LIST_MY} className="text-white hover:text-blue-600">
+                <Link to={URLS.APP.LIST_MY} className={`${textColor} ${hoverColor}`}>
                   Mis Eventos
                 </Link>
-                <Link to={URLS.APP.CREATE} className="text-white hover:text-blue-600">
+                <Link to={URLS.APP.CREATE} className={`${textColor} ${hoverColor}`}>
                   Crear Evento
                 </Link>
               </>
             )}
-            {/* TEMA */}
-            <div className="relative group">
-              <button
-                onClick={() => toggleSubMenu("themeMenu")}
-                className="text-white hover:text-blue-600 flex items-center"
-              >
-                Tema <BsChevronDown size={10} className="inline ml-1" />
-              </button>
-              <div
-                id="themeMenu"
-                className="absolute hidden bg-white shadow-md mt-2 rounded-md z-10 min-w-[150px]"
-              >
-                <button
-                  onClick={() => changeTheme("blue")}
-                  className="block w-full text-left hover:bg-gray-100 py-2 px-4"
-                >
-                  Azul Oscuro
-                </button>
-                <button
-                  onClick={() => changeTheme("dark")}
-                  className="block w-full text-left hover:bg-gray-100 py-2 px-4"
-                >
-                  Negro Opaco
-                </button>
-                <button
-                  onClick={() => changeTheme("default")}
-                  className="block w-full text-left hover:bg-gray-100 py-2 px-4"
-                >
-                  Normal
-                </button>
-              </div>
-            </div>
+
+            {/* BOTÓN DE CAMBIO DE TEMA */}
+            <button
+              onClick={() => changeTheme(theme === "dark" ? "light" : "dark")}
+              className={`p-2 rounded-full border ${textColor} ${hoverColor} dark:border-gray-500 border-gray-300`}
+              title={`Cambiar a modo ${theme === "dark" ? "claro" : "oscuro"}`}
+            >
+              {theme === "dark" ? <BsSun size={18} /> : <BsMoon size={18} />}
+            </button>
 
             {!token ? (
               <>
-                <Link to={URLS.LOGIN} className="text-white hover:text-blue-600">
+                <Link to={URLS.LOGIN} className={`${textColor} ${hoverColor}`}>
                   Iniciar sesión
                 </Link>
-                <Link to={URLS.REGISTER} className="text-white hover:text-blue-600">
+                <Link to={URLS.REGISTER} className={`${textColor} ${hoverColor}`}>
                   Registrarse
                 </Link>
               </>
@@ -133,9 +106,10 @@ export const Menu = () => {
               <div className="relative group">
                 <button
                   onClick={() => toggleSubMenu("authMenu")}
-                  className="text-white hover:text-blue-600 flex items-center"
+                  className={`${textColor} ${hoverColor} flex items-center`}
                 >
-                  {user?.username || "Usuario"} <BsChevronDown size={10} className="inline ml-1" />
+                  {user?.username || "Usuario"}{" "}
+                  <BsChevronDown size={10} className="inline ml-1" />
                 </button>
                 <div
                   id="authMenu"
@@ -154,31 +128,42 @@ export const Menu = () => {
         </div>
       </div>
 
+      {/* MENÚ PARA MÓVIL */}
       <div className={`md:hidden px-4 pb-4 ${!showMenu ? "hidden" : ""}`}>
-        <Link to={URLS.APP.LIST} className="block text-white py-2">
+        <Link to={URLS.APP.LIST} className={`block ${textColor} py-2`}>
           Eventos
         </Link>
         {token && (
           <>
-            <Link to={URLS.APP.LIST_MY} className="block text-white py-2">
+            <Link to={URLS.APP.LIST_MY} className={`block ${textColor} py-2`}>
               Mis Eventos
             </Link>
-            <Link to={URLS.APP.CREATE} className="block text-white py-2">
+            <Link to={URLS.APP.CREATE} className={`block ${textColor} py-2`}>
               Crear Evento
             </Link>
           </>
         )}
+
+        {/* BOTÓN DE CAMBIO DE TEMA (móvil) */}
+        <button
+          onClick={() => changeTheme(theme === "dark" ? "light" : "dark")}
+          className={`mt-2 p-2 rounded-full border ${textColor} ${hoverColor} dark:border-gray-500 border-gray-300`}
+          title={`Cambiar a modo ${theme === "dark" ? "claro" : "oscuro"}`}
+        >
+          {theme === "dark" ? <BsSun size={18} /> : <BsMoon size={18} />}
+        </button>
+
         {!token ? (
           <>
-            <Link to={URLS.LOGIN} className="block text-white py-2">
+            <Link to={URLS.LOGIN} className={`block ${textColor} py-2`}>
               Iniciar sesión
             </Link>
-            <Link to={URLS.REGISTER} className="block text-white py-2">
+            <Link to={URLS.REGISTER} className={`block ${textColor} py-2`}>
               Registrarse
             </Link>
           </>
         ) : (
-          <button onClick={onLogoutClick} className="block text-white py-2">
+          <button onClick={onLogoutClick} className={`block ${textColor} py-2`}>
             Cerrar sesión
           </button>
         )}
@@ -188,3 +173,4 @@ export const Menu = () => {
 };
 
 export default Menu;
+
